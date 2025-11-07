@@ -5,19 +5,74 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
+import type { SignupForm } from "@/types";
 
 export function OnboardingScreen({ onGetStarted }: { onGetStarted: () => void }) {
   const [showSignup, setShowSignup] = useState(false);
-  const [signupForm, setSignupForm] = useState({
+  const [signupForm, setSignupForm] = useState<SignupForm>({
     id: "",
     password: "",
-    name: ""
+    name: "",
+    birthDate: "",
+    gender: ""
   });
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle signup logic here
-    console.log("Signup:", signupForm);
+    
+    // 유효성 검사
+    if (!signupForm.id || signupForm.id.length < 4) {
+      toast.error("아이디는 4자 이상이어야 합니다.");
+      return;
+    }
+    
+    if (!signupForm.password || signupForm.password.length < 6) {
+      toast.error("비밀번호는 6자 이상이어야 합니다.");
+      return;
+    }
+    
+    if (!signupForm.name || signupForm.name.length < 2) {
+      toast.error("이름을 올바르게 입력해주세요.");
+      return;
+    }
+    
+    if (!signupForm.birthDate) {
+      toast.error("생년월일을 선택해주세요.");
+      return;
+    }
+    
+    if (!signupForm.gender) {
+      toast.error("성별을 선택해주세요.");
+      return;
+    }
+    
+    // 나이 계산
+    const birthYear = new Date(signupForm.birthDate).getFullYear();
+    const currentYear = new Date().getFullYear();
+    const age = currentYear - birthYear;
+    
+    if (age < 14) {
+      toast.error("만 14세 이상부터 가입 가능합니다.");
+      return;
+    }
+    
+    // 회원가입 성공
+    const userData = {
+      ...signupForm,
+      age,
+      createdAt: new Date().toISOString()
+    };
+    
+    // localStorage에 저장
+    localStorage.setItem("user_profile", JSON.stringify(userData));
+    
+    toast.success("회원가입이 완료되었습니다!", {
+      description: `${signupForm.name}님, 환영합니다!`
+    });
+    
+    console.log("Signup:", userData);
     setShowSignup(false);
     onGetStarted();
   };
@@ -159,6 +214,36 @@ export function OnboardingScreen({ onGetStarted }: { onGetStarted: () => void })
                 onChange={(e) => setSignupForm({ ...signupForm, name: e.target.value })}
                 required
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="signup-birthdate">생년월일</Label>
+              <Input
+                id="signup-birthdate"
+                type="date"
+                placeholder="YYYY-MM-DD"
+                className="h-12 rounded-xl"
+                value={signupForm.birthDate}
+                onChange={(e) => setSignupForm({ ...signupForm, birthDate: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="signup-gender">성별</Label>
+              <Select
+                value={signupForm.gender}
+                onValueChange={(value: "male" | "female") => setSignupForm({ ...signupForm, gender: value })}
+                required
+              >
+                <SelectTrigger className="h-12 rounded-xl">
+                  <SelectValue placeholder="성별을 선택하세요" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">남자</SelectItem>
+                  <SelectItem value="female">여자</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <Button 

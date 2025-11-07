@@ -54,11 +54,20 @@ export interface UserProfile {
   weight?: number;
   height?: number;
   birthDate?: Date;
+  gender?: "male" | "female";
   preferences: {
     notifications: boolean;
     darkMode: boolean;
     language: string;
   };
+}
+
+export interface SignupForm {
+  id: string;
+  password: string;
+  name: string;
+  birthDate: string;
+  gender: "male" | "female" | "";
 }
 
 // 화면 Props 타입
