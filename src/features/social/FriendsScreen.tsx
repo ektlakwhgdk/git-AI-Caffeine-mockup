@@ -4,21 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ChevronLeft, UserPlus, Trophy, TrendingUp, TrendingDown } from "lucide-react";
 import { motion } from "motion/react";
+import type { Friend } from "@/types";
 
 interface FriendsScreenProps {
   onBack: () => void;
   onFriendClick: (friend: Friend) => void;
-}
-
-export interface Friend {
-  id: number;
-  name: string;
-  initials: string;
-  caffeineLevel: number;
-  avatarColor: string;
-  trend: "up" | "down" | "stable";
-  lastDrink: string;
-  rank?: number;
 }
 
 export function FriendsScreen({ onBack, onFriendClick }: FriendsScreenProps) {

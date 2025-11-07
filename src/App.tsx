@@ -1,16 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { OnboardingScreen } from "@/screens/OnboardingScreen";
 import { DashboardScreen } from "@/screens/DashboardScreen";
-import { AIChatbotScreen } from "./features/ai-chatbot/AIChatbotScreen";
-import { TrackingScreen } from "./features/tracking/TrackingScreen";
-import { FriendsScreen, type Friend } from "./features/social/FriendsScreen";
-import { ChatScreen } from "./features/social/ChatScreen";
-import { ChallengeScreen } from "./features/challenge/ChallengeScreen";
-import { ProfileScreen } from "./features/profile/ProfileScreen";
-import { BottomNavigation } from "./components/common/BottomNavigation";
-import { CaffeineAlert } from "./features/caffeine/CaffeineAlert";
-import { CaffeineProvider } from "./contexts/CaffeineContext";
-import { Toaster } from "./components/ui/sonner";
+import { AIChatbotScreen } from "@/features/ai-chatbot/AIChatbotScreen";
+import { TrackingScreen } from "@/features/tracking/TrackingScreen";
+import { FriendsScreen } from "@/features/social/FriendsScreen";
+import { ChatScreen } from "@/features/social/ChatScreen";
+import { ChallengeScreen } from "@/features/challenge/ChallengeScreen";
+import { ProfileScreen } from "@/features/profile/ProfileScreen";
+import { BottomNavigation } from "@/components/common/BottomNavigation";
+import { CaffeineProvider } from "@/contexts/CaffeineContext";
+import { Toaster } from "@/components/ui/sonner";
+import type { Friend, Nullable } from "@/types";
 
 export default function App() {
   const [hasOnboarded, setHasOnboarded] = useState(false);

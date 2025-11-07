@@ -1,20 +1,13 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { toast } from "sonner@2.0.3";
-
-interface CaffeineEntry {
-  id: string;
-  brand: string;
-  drink: string;
-  caffeine: number;
-  timestamp: Date;
-}
+import { toast } from "sonner";
+import type { CaffeineEntry, StatusType } from "@/types";
 
 interface CaffeineContextType {
   currentIntake: number;
   dailyLimit: number;
   entries: CaffeineEntry[];
   addCaffeine: (entry: Omit<CaffeineEntry, "id" | "timestamp">) => void;
-  getCaffeineStatus: () => "safe" | "caution" | "high";
+  getCaffeineStatus: () => StatusType;
   remainingCaffeine: number;
   hasShownHighAlert: boolean;
 }
