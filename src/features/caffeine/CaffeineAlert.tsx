@@ -6,7 +6,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../../../components/ui/alert-dialog";
+} from "@/components/ui/alert-dialog";
 import { AlertTriangle } from "lucide-react";
 
 interface CaffeineAlertProps {

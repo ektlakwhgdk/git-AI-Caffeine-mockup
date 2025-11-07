@@ -1,11 +1,11 @@
-import { Button } from "../components/ui/button";
-import { Card } from "../components/ui/card";
-import { Progress } from "../components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { Coffee, Sparkles, Plus, TrendingUp, Clock, Shield, AlertTriangle, AlertCircle } from "lucide-react";
 import { motion } from "motion/react";
-import { CaffeineHalfLifeCurve } from "../features/caffeine/CaffeineHalfLifeCurve";
-import { useCaffeine } from "../contexts/CaffeineContext";
-import { Badge } from "../components/ui/badge";
+import { CaffeineHalfLifeCurve } from "@/features/caffeine/CaffeineHalfLifeCurve";
+import { useCaffeine } from "@/contexts/CaffeineContext";
+import { Badge } from "@/components/ui/badge";
 
 interface DashboardScreenProps {
   onNavigate: (screen: string) => void;

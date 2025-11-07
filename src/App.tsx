@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { OnboardingScreen } from "./screens/OnboardingScreen";
-import { DashboardScreen } from "./screens/DashboardScreen";
+import { OnboardingScreen } from "@/screens/OnboardingScreen";
+import { DashboardScreen } from "@/screens/DashboardScreen";
 import { AIChatbotScreen } from "./features/ai-chatbot/AIChatbotScreen";
 import { TrackingScreen } from "./features/tracking/TrackingScreen";
 import { FriendsScreen, type Friend } from "./features/social/FriendsScreen";

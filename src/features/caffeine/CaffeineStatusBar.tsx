@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { useCaffeine } from "../../contexts/CaffeineContext";
+import { useCaffeine } from "@/contexts/CaffeineContext";
 import { Shield, AlertTriangle, AlertCircle } from "lucide-react";
 
 export function CaffeineStatusBar() {

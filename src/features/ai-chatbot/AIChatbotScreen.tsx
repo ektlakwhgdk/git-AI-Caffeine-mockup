@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, Send, Sparkles, Coffee, TrendingDown, Calendar } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { Card } from "../../../components/ui/card";
-import { Input } from "../../../components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "motion/react";
-import { useCaffeine } from "../../contexts/CaffeineContext";
+import { useCaffeine } from "@/contexts/CaffeineContext";
 
 interface AIChatbotScreenProps {
   onBack: () => void;

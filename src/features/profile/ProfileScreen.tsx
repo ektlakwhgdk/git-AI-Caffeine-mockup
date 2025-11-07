@@ -1,7 +1,7 @@
-import { Card } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
-import { Switch } from "../../../components/ui/switch";
-import { Label } from "../../../components/ui/label";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { ChevronLeft, User, Weight, Ruler, Calendar, Zap, Bell, Globe, LogOut, ChevronRight } from "lucide-react";
 import { motion } from "motion/react";
 
