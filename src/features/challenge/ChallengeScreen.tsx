@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Card } from "./ui/card";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { Progress } from "./ui/progress";
+import { Card } from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Badge } from "../../../components/ui/badge";
+import { Progress } from "../../../components/ui/progress";
 import { ChevronLeft, Target, Clock, TrendingDown, Coffee, CheckCircle2, Trophy, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "./ui/dialog";
+} from "../../../components/ui/dialog";
 
 interface ChallengeScreenProps {
   onBack: () => void;

@@ -1,10 +1,10 @@
-import { Button } from "./ui/button";
+import { Button } from "../../components/ui/button";
 import { Coffee } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../components/ui/dialog";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
 
 export function OnboardingScreen({ onGetStarted }: { onGetStarted: () => void }) {
   const [showSignup, setShowSignup] = useState(false);

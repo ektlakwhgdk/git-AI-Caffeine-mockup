@@ -17,22 +17,31 @@ AI Caffeine Advisor Mockup/
 ├── .gitignore                      # Git 무시 파일 설정
 ├── node_modules/                   # npm 패키지 의존성
 ├── src/                            # 소스 코드
-│   ├── components/                 # React 컴포넌트
+│   ├── components/                 # 공통 컴포넌트
+│   │   ├── common/                 # 공통 UI 컴포넌트
+│   │   │   └── BottomNavigation.tsx # 하단 네비게이션
 │   │   ├── ui/                     # shadcn/ui 기반 UI 컴포넌트 (48개)
-│   │   ├── figma/                  # Figma 관련 컴포넌트
-│   │   ├── AIChatbotScreen.tsx     # AI 챗봇 화면
-│   │   ├── BottomNavigation.tsx    # 하단 네비게이션
-│   │   ├── CaffeineAlert.tsx       # 카페인 알림
-│   │   ├── CaffeineHalfLifeCurve.tsx # 카페인 반감기 그래프
-│   │   ├── CaffeineStatusBar.tsx   # 카페인 상태 바
-│   │   ├── ChallengeScreen.tsx     # 챌린지 화면
-│   │   ├── ChatScreen.tsx          # 채팅 화면
-│   │   ├── DashboardScreen.tsx     # 대시보드 화면
-│   │   ├── FriendsScreen.tsx       # 친구 목록 화면
+│   │   └── figma/                  # Figma 관련 컴포넌트
+│   ├── screens/                    # 화면 컴포넌트
 │   │   ├── OnboardingScreen.tsx    # 온보딩 화면
-│   │   ├── ProfileScreen.tsx       # 프로필 화면
-│   │   ├── RecommendationScreen.tsx # 추천 화면
-│   │   └── TrackingScreen.tsx      # 트래킹 화면
+│   │   └── DashboardScreen.tsx     # 대시보드 화면
+│   ├── features/                   # 기능별 컴포넌트
+│   │   ├── caffeine/               # 카페인 관련 기능
+│   │   │   ├── CaffeineAlert.tsx   # 카페인 알림
+│   │   │   ├── CaffeineStatusBar.tsx # 카페인 상태 바
+│   │   │   └── CaffeineHalfLifeCurve.tsx # 카페인 반감기 그래프
+│   │   ├── ai-chatbot/             # AI 챗봇 기능
+│   │   │   ├── AIChatbotScreen.tsx # AI 챗봇 화면
+│   │   │   └── RecommendationScreen.tsx # 추천 화면
+│   │   ├── tracking/               # 트래킹 기능
+│   │   │   └── TrackingScreen.tsx  # 트래킹 화면
+│   │   ├── social/                 # 소셜 기능
+│   │   │   ├── FriendsScreen.tsx   # 친구 목록 화면
+│   │   │   └── ChatScreen.tsx      # 채팅 화면
+│   │   ├── challenge/              # 챌린지 기능
+│   │   │   └── ChallengeScreen.tsx # 챌린지 화면
+│   │   └── profile/                # 프로필 기능
+│   │       └── ProfileScreen.tsx   # 프로필 화면
 │   ├── contexts/                   # React Context
 │   │   └── CaffeineContext.tsx     # 카페인 데이터 관리 Context
 │   ├── guidelines/                 # 개발 가이드라인
@@ -48,6 +57,7 @@ AI Caffeine Advisor Mockup/
 ├── package-lock.json               # npm 의존성 잠금 파일
 ├── vite.config.ts                  # Vite 설정
 ├── server.js                       # 서버 파일 (개발 중)
+├── fix-imports.js                  # Import 경로 수정 스크립트
 ├── README.md                       # 프로젝트 README
 └── AIconfierm.md                   # 이 문서
 
@@ -419,10 +429,18 @@ interface Friend {
 - Context API로 상태 관리
 
 ### 파일 구조
-- 컴포넌트는 `src/components/`에 위치
-- UI 컴포넌트는 `src/components/ui/`에 위치
-- Context는 `src/contexts/`에 위치
-- 스타일은 `src/styles/`에 위치
+- **화면 컴포넌트**: `src/screens/` - 온보딩, 대시보드 등 주요 화면
+- **기능별 컴포넌트**: `src/features/` - 기능별로 그룹화된 컴포넌트
+  - `caffeine/` - 카페인 관련 (Alert, StatusBar, HalfLifeCurve)
+  - `ai-chatbot/` - AI 챗봇 및 추천
+  - `tracking/` - 카페인 트래킹
+  - `social/` - 친구 및 채팅
+  - `challenge/` - 챌린지
+  - `profile/` - 프로필
+- **공통 컴포넌트**: `src/components/common/` - 네비게이션 등
+- **UI 컴포넌트**: `src/components/ui/` - shadcn/ui 컴포넌트
+- **Context**: `src/contexts/` - 전역 상태 관리
+- **스타일**: `src/styles/` - 전역 CSS
 
 ### 네이밍 컨벤션
 - 컴포넌트: PascalCase (예: `DashboardScreen.tsx`)

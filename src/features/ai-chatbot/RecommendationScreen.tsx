@@ -1,7 +1,7 @@
-import { Card } from "./ui/card";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { Card } from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Badge } from "../../../components/ui/badge";
+import { ImageWithFallback } from "../../../components/figma/ImageWithFallback";
 import { Sparkles, Coffee, ChevronLeft, Heart } from "lucide-react";
 import { motion } from "motion/react";
 

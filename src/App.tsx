@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
-import { OnboardingScreen } from "./components/OnboardingScreen";
-import { DashboardScreen } from "./components/DashboardScreen";
-import { AIChatbotScreen } from "./components/AIChatbotScreen";
-import { TrackingScreen } from "./components/TrackingScreen";
-import { FriendsScreen, type Friend } from "./components/FriendsScreen";
-import { ChatScreen } from "./components/ChatScreen";
-import { ChallengeScreen } from "./components/ChallengeScreen";
-import { ProfileScreen } from "./components/ProfileScreen";
-import { BottomNavigation } from "./components/BottomNavigation";
-import { CaffeineAlert } from "./components/CaffeineAlert";
+import { OnboardingScreen } from "./screens/OnboardingScreen";
+import { DashboardScreen } from "./screens/DashboardScreen";
+import { AIChatbotScreen } from "./features/ai-chatbot/AIChatbotScreen";
+import { TrackingScreen } from "./features/tracking/TrackingScreen";
+import { FriendsScreen, type Friend } from "./features/social/FriendsScreen";
+import { ChatScreen } from "./features/social/ChatScreen";
+import { ChallengeScreen } from "./features/challenge/ChallengeScreen";
+import { ProfileScreen } from "./features/profile/ProfileScreen";
+import { BottomNavigation } from "./components/common/BottomNavigation";
+import { CaffeineAlert } from "./features/caffeine/CaffeineAlert";
 import { CaffeineProvider } from "./contexts/CaffeineContext";
 import { Toaster } from "./components/ui/sonner";
 
