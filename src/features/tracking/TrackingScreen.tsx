@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronLeft, Coffee, Plus, TrendingDown } from "lucide-react";
 import { useCaffeine } from "@/contexts/CaffeineContext";
+import { menuAPI } from "@/lib/api";
+import { toast } from "sonner";
 
 interface TrackingScreenProps {
   onBack: () => void;
@@ -14,71 +16,71 @@ interface TrackingScreenProps {
 
 export function TrackingScreen({ onBack }: TrackingScreenProps) {
   const { currentIntake, remainingCaffeine, addCaffeine } = useCaffeine();
+  const [brands, setBrands] = useState<Array<{ brand_id: number; brand_name: string }>>([]);
+  const [menus, setMenus] = useState<Array<any>>([]);
   const [selectedBrand, setSelectedBrand] = useState("");
-  const [selectedDrink, setSelectedDrink] = useState("");
-  const [selectedDrinkName, setSelectedDrinkName] = useState("");
+  const [selectedMenu, setSelectedMenu] = useState<any>(null);
   const [caffeineAmount, setCaffeineAmount] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const brands = [
-    { value: "starbucks", label: "Starbucks", emoji: "⭐" },
-    { value: "mega", label: "Mega Coffee", emoji: "☕" },
-    { value: "compose", label: "Compose Coffee", emoji: "🎵" },
-    { value: "ediya", label: "Ediya Coffee", emoji: "🌿" },
-    { value: "other", label: "Other", emoji: "➕" }
-  ];
+  // DB에서 브랜드 목록 로드
+  useEffect(() => {
+    const loadBrands = async () => {
+      try {
+        const data = await menuAPI.getBrands();
+        setBrands(data);
+      } catch (error) {
+        console.error('Failed to load brands:', error);
+        toast.error('브랜드 목록을 불러올 수 없습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadBrands();
+  }, []);
 
-  const drinks = {
-    starbucks: [
-      { value: "americano", label: "Americano", caffeine: "75" },
-      { value: "latte", label: "Caffe Latte", caffeine: "75" },
-      { value: "cappuccino", label: "Cappuccino", caffeine: "75" },
-      { value: "espresso", label: "Espresso", caffeine: "150" },
-      { value: "cold-brew", label: "Cold Brew", caffeine: "200" }
-    ],
-    mega: [
-      { value: "americano", label: "Americano", caffeine: "150" },
-      { value: "latte", label: "Mega Latte", caffeine: "45" },
-      { value: "vanilla", label: "Vanilla Latte", caffeine: "45" }
-    ],
-    compose: [
-      { value: "americano", label: "Americano", caffeine: "126" },
-      { value: "latte", label: "Caffe Latte", caffeine: "75" },
-      { value: "einspanner", label: "Einspanner", caffeine: "90" }
-    ],
-    ediya: [
-      { value: "americano", label: "Americano", caffeine: "150" },
-      { value: "latte", label: "Caffe Latte", caffeine: "150" },
-      { value: "mocha", label: "Caffe Mocha", caffeine: "120" }
-    ],
-    other: []
-  };
+  // 브랜드 선택 시 해당 브랜드의 메뉴 로드
+  useEffect(() => {
+    const loadMenus = async () => {
+      if (!selectedBrand) {
+        setMenus([]);
+        return;
+      }
 
-  const handleDrinkSelect = (value: string) => {
-    setSelectedDrink(value);
-    const brandDrinks = drinks[selectedBrand as keyof typeof drinks] || [];
-    const drink = brandDrinks.find(d => d.value === value);
-    if (drink) {
-      setCaffeineAmount(drink.caffeine);
-      setSelectedDrinkName(drink.label);
+      try {
+        const data = await menuAPI.getMenusByBrand(parseInt(selectedBrand));
+        setMenus(data);
+      } catch (error) {
+        console.error('Failed to load menus:', error);
+        toast.error('메뉴 목록을 불러올 수 없습니다.');
+      }
+    };
+    loadMenus();
+  }, [selectedBrand]);
+
+  const handleMenuSelect = (menuId: string) => {
+    const menu = menus.find(m => m.menu_id.toString() === menuId);
+    if (menu) {
+      setSelectedMenu(menu);
+      setCaffeineAmount(menu.caffeine_mg.toString());
     }
   };
 
   const handleAddCaffeine = () => {
     if (!caffeineAmount || !selectedBrand) return;
 
-    const brandName = brands.find(b => b.value === selectedBrand)?.label || "Unknown";
-    const drinkName = selectedDrinkName || "Custom Drink";
+    const brandName = brands.find(b => b.brand_id.toString() === selectedBrand)?.brand_name || "Unknown";
+    const menuName = selectedMenu?.menu_name || "Custom Drink";
 
     addCaffeine({
       brand: brandName,
-      drink: drinkName,
+      drink: menuName,
       caffeine: parseInt(caffeineAmount),
     });
 
     // Reset form
     setSelectedBrand("");
-    setSelectedDrink("");
-    setSelectedDrinkName("");
+    setSelectedMenu(null);
     setCaffeineAmount("");
 
     // Go back to home after a short delay
@@ -156,35 +158,32 @@ export function TrackingScreen({ onBack }: TrackingScreenProps) {
               </SelectTrigger>
               <SelectContent>
                 {brands.map((brand) => (
-                  <SelectItem key={brand.value} value={brand.value}>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-lg">{brand.emoji}</span>
-                      <span>{brand.label}</span>
-                    </div>
+                  <SelectItem key={brand.brand_id} value={brand.brand_id.toString()}>
+                    <span>{brand.brand_name}</span>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          {selectedBrand && selectedBrand !== "other" && (
+          {selectedBrand && menus.length > 0 && (
             <motion.div 
               className="space-y-2"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               transition={{ duration: 0.3 }}
             >
-              <Label htmlFor="drink">음료 선택</Label>
-              <Select value={selectedDrink} onValueChange={handleDrinkSelect}>
-                <SelectTrigger id="drink" className="h-12 rounded-xl bg-card">
+              <Label htmlFor="menu">음료 선택</Label>
+              <Select value={selectedMenu?.menu_id.toString() || ""} onValueChange={handleMenuSelect}>
+                <SelectTrigger id="menu" className="h-12 rounded-xl bg-card">
                   <SelectValue placeholder="음료를 선택하세요..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {(drinks[selectedBrand as keyof typeof drinks] || []).map((drink) => (
-                    <SelectItem key={drink.value} value={drink.value}>
+                  {menus.map((menu) => (
+                    <SelectItem key={menu.menu_id} value={menu.menu_id.toString()}>
                       <div className="flex items-center justify-between w-full">
-                        <span>{drink.label}</span>
-                        <span className="text-xs text-muted-foreground ml-4">{drink.caffeine}mg</span>
+                        <span>{menu.menu_name} ({menu.size})</span>
+                        <span className="text-xs text-muted-foreground ml-4">{menu.caffeine_mg}mg</span>
                       </div>
                     </SelectItem>
                   ))}

@@ -4,6 +4,9 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ChevronLeft, User, Weight, Ruler, Calendar, Zap, Bell, Globe, LogOut, ChevronRight } from "lucide-react";
 import { motion } from "motion/react";
+import { useState, useEffect } from "react";
+import { profileAPI, removeToken } from "@/lib/api";
+import { toast } from "sonner";
 
 interface ProfileScreenProps {
   onBack: () => void;
@@ -11,8 +14,52 @@ interface ProfileScreenProps {
 }
 
 export function ProfileScreen({ onBack, onLogout }: ProfileScreenProps) {
-  const dailyLimit = 200;
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const recommendedLimit = 400; // WHO recommended limit
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const data = await profileAPI.getProfile();
+        setProfile(data);
+      } catch (error) {
+        console.error('Failed to load profile:', error);
+        toast.error('프로필 로드 중 오류가 발생했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProfile();
+  }, []);
+
+  const handleLogoutClick = () => {
+    removeToken();
+    localStorage.removeItem('user_profile');
+    onLogout();
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-muted-foreground">로딩 중...</p>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-muted-foreground">프로필 정보를 불러올 수 없습니다.</p>
+      </div>
+    );
+  }
+
+  const dailyLimit = profile.caffeineInfo?.max_caffeine || 400;
+  const weight = profile.caffeineInfo?.weight_kg || 0;
+  const birthDate = profile.caffeineInfo?.age ? new Date(profile.caffeineInfo.age) : null;
+  const age = birthDate ? new Date().getFullYear() - birthDate.getFullYear() : 0;
+  const initials = profile.name.substring(0, 2).toUpperCase();
 
   return (
     <div className="flex flex-col h-full bg-background">
@@ -50,11 +97,11 @@ export function ProfileScreen({ onBack, onLogout }: ProfileScreenProps) {
                 className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0"
                 whileHover={{ scale: 1.05 }}
               >
-                <span className="text-primary-foreground text-[28px]">JD</span>
+                <span className="text-primary-foreground text-[28px]">{initials}</span>
               </motion.div>
               <div className="flex-1">
-                <h2 className="text-[22px] mb-1">John Doe</h2>
-                <p className="text-sm text-muted-foreground">johndoe@email.com</p>
+                <h2 className="text-[22px] mb-1">{profile.name}</h2>
+                <p className="text-sm text-muted-foreground">{profile.username}</p>
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button 
                     variant="outline" 
@@ -84,7 +131,7 @@ export function ProfileScreen({ onBack, onLogout }: ProfileScreenProps) {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Weight</p>
-                    <p className="text-[18px]">70 kg</p>
+                    <p className="text-[18px]">{weight > 0 ? `${weight} kg` : '-'}</p>
                   </div>
                 </div>
               </Card>
@@ -97,8 +144,8 @@ export function ProfileScreen({ onBack, onLogout }: ProfileScreenProps) {
                     <Ruler className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Height</p>
-                    <p className="text-[18px]">175 cm</p>
+                    <p className="text-xs text-muted-foreground">Gender</p>
+                    <p className="text-[18px]">{profile.caffeineInfo?.gender || '-'}</p>
                   </div>
                 </div>
               </Card>
@@ -112,7 +159,7 @@ export function ProfileScreen({ onBack, onLogout }: ProfileScreenProps) {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Age</p>
-                    <p className="text-[18px]">28 years</p>
+                    <p className="text-[18px]">{age > 0 ? `${age} years` : '-'}</p>
                   </div>
                 </div>
               </Card>
@@ -126,7 +173,7 @@ export function ProfileScreen({ onBack, onLogout }: ProfileScreenProps) {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Daily Limit</p>
-                    <p className="text-[18px]">200 mg</p>
+                    <p className="text-[18px]">{dailyLimit} mg</p>
                   </div>
                 </div>
               </Card>
@@ -273,7 +320,7 @@ export function ProfileScreen({ onBack, onLogout }: ProfileScreenProps) {
               <Button
                 variant="ghost"
                 className="w-full h-14 rounded-xl justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
-                onClick={onLogout}
+                onClick={handleLogoutClick}
               >
                 <LogOut className="w-5 h-5 mr-3" />
                 Log Out

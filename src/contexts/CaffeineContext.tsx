@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { toast } from "sonner";
 import type { CaffeineEntry, StatusType } from "@/types";
+import { caffeineAPI, getToken } from "@/lib/api";
 
 interface CaffeineContextType {
   currentIntake: number;
@@ -24,14 +25,43 @@ export function CaffeineProvider({ children }: { children: ReactNode }) {
   const [hasShownHighAlert, setHasShownHighAlert] = useState(false);
   const [lastResetDate, setLastResetDate] = useState<string>("");
 
-  // Load data from localStorage on mount
+  // Load data from API on mount
   useEffect(() => {
-    const today = new Date().toDateString();
-    
-    // Force reset to 0 - clear all data
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(ALERT_SHOWN_KEY);
-    resetDailyData(today);
+    const loadCaffeineData = async () => {
+      const token = getToken();
+      if (!token) {
+        // 로그인하지 않은 경우 로컬 데이터 사용
+        const today = new Date().toDateString();
+        resetDailyData(today);
+        return;
+      }
+
+      try {
+        // API에서 현재 카페인 정보 가져오기
+        const caffeineInfo = await caffeineAPI.getCurrentInfo();
+        setCurrentIntake(caffeineInfo.current_caffeine);
+        
+        // 오늘의 섭취 이력 가져오기
+        const history = await caffeineAPI.getTodayHistory();
+        const todayEntries: CaffeineEntry[] = history.map(h => ({
+          id: h.history_id.toString(),
+          brand: h.brand_name,
+          drink: h.menu_name,
+          caffeine: h.caffeine_mg,
+          timestamp: new Date(h.drinked_at)
+        }));
+        setEntries(todayEntries);
+        
+        const today = new Date().toDateString();
+        setLastResetDate(today);
+      } catch (error) {
+        console.error('Failed to load caffeine data:', error);
+        const today = new Date().toDateString();
+        resetDailyData(today);
+      }
+    };
+
+    loadCaffeineData();
   }, []);
 
   // Auto-reset at midnight
@@ -72,43 +102,73 @@ export function CaffeineProvider({ children }: { children: ReactNode }) {
     return "safe";
   };
 
-  const addCaffeine = (entry: Omit<CaffeineEntry, "id" | "timestamp">) => {
-    const newEntry: CaffeineEntry = {
-      ...entry,
-      id: Date.now().toString(),
-      timestamp: new Date(),
-    };
+  const addCaffeine = async (entry: Omit<CaffeineEntry, "id" | "timestamp">) => {
+    const token = getToken();
+    
+    if (!token) {
+      // 로그인하지 않은 경우 로컬에만 저장
+      const newEntry: CaffeineEntry = {
+        ...entry,
+        id: Date.now().toString(),
+        timestamp: new Date(),
+      };
+      const newIntake = currentIntake + entry.caffeine;
+      setEntries((prev) => [...prev, newEntry]);
+      setCurrentIntake(newIntake);
+      toast.success(`${entry.drink} 추가됨`, {
+        description: `+${entry.caffeine}mg 카페인`,
+      });
+      return;
+    }
 
-    const newIntake = currentIntake + entry.caffeine;
-    const previousStatus = getCaffeineStatus();
+    try {
+      // API를 통해 DB에 저장
+      const response = await caffeineAPI.addIntake({
+        brand_name: entry.brand,
+        menu_name: entry.drink,
+        caffeine_mg: entry.caffeine,
+      });
 
-    setEntries((prev) => [...prev, newEntry]);
-    setCurrentIntake(newIntake);
+      const newEntry: CaffeineEntry = {
+        ...entry,
+        id: Date.now().toString(),
+        timestamp: new Date(),
+      };
 
-    // Show success toast
-    toast.success(`${entry.drink} 추가됨`, {
-      description: `+${entry.caffeine}mg 카페인`,
-    });
+      const newIntake = response.caffeineInfo.current_caffeine;
+      const previousStatus = getCaffeineStatus();
 
-    // Check if we need to show high alert
-    if (newIntake >= 300 && !hasShownHighAlert && previousStatus !== "high") {
-      setHasShownHighAlert(true);
-      const today = new Date().toDateString();
-      localStorage.setItem(ALERT_SHOWN_KEY, JSON.stringify({ date: today, shown: true }));
-      
-      // Trigger high caffeine alert
-      setTimeout(() => {
-        toast.warning("카페인 섭취 주의", {
-          description: "일일 권장량에 근접했습니다. 섭취를 모니터링 해주세요.",
+      setEntries((prev) => [...prev, newEntry]);
+      setCurrentIntake(newIntake);
+
+      // Show success toast
+      toast.success(`${entry.drink} 추가됨`, {
+        description: `+${entry.caffeine}mg 카페인`,
+      });
+
+      // Check if we need to show high alert
+      if (newIntake >= 300 && !hasShownHighAlert && previousStatus !== "high") {
+        setHasShownHighAlert(true);
+        const today = new Date().toDateString();
+        localStorage.setItem(ALERT_SHOWN_KEY, JSON.stringify({ date: today, shown: true }));
+        
+        // Trigger high caffeine alert
+        setTimeout(() => {
+          toast.warning("카페인 섭취 주의", {
+            description: "일일 권장량에 근접했습니다. 섭취를 모니터링 해주세요.",
+            duration: 5000,
+          });
+        }, 500);
+      } else if (newIntake >= DAILY_LIMIT) {
+        // Show exceeded alert
+        toast.error("일일 권장량 초과", {
+          description: "카페인 일일 권장량(400mg)을 초과했습니다.",
           duration: 5000,
         });
-      }, 500);
-    } else if (newIntake >= DAILY_LIMIT) {
-      // Show exceeded alert
-      toast.error("일일 권장량 초과", {
-        description: "카페인 일일 권장량(400mg)을 초과했습니다.",
-        duration: 5000,
-      });
+      }
+    } catch (error) {
+      console.error('Failed to add caffeine:', error);
+      toast.error(error instanceof Error ? error.message : "카페인 기록 중 오류가 발생했습니다.");
     }
   };
 

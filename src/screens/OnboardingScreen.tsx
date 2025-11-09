@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import type { SignupForm } from "@/types";
+import { authAPI, setToken } from "@/lib/api";
 
 export function OnboardingScreen({ onGetStarted }: { onGetStarted: () => void }) {
   const [showSignup, setShowSignup] = useState(false);
@@ -19,8 +20,10 @@ export function OnboardingScreen({ onGetStarted }: { onGetStarted: () => void })
     gender: ""
   });
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    console.log("회원가입 시도:", signupForm);
     
     // 유효성 검사
     if (!signupForm.id || signupForm.id.length < 4) {
@@ -58,23 +61,36 @@ export function OnboardingScreen({ onGetStarted }: { onGetStarted: () => void })
       return;
     }
     
-    // 회원가입 성공
-    const userData = {
-      ...signupForm,
-      age,
-      createdAt: new Date().toISOString()
-    };
+    console.log("유효성 검사 통과, API 요청 시작");
     
-    // localStorage에 저장
-    localStorage.setItem("user_profile", JSON.stringify(userData));
-    
-    toast.success("회원가입이 완료되었습니다!", {
-      description: `${signupForm.name}님, 환영합니다!`
-    });
-    
-    console.log("Signup:", userData);
-    setShowSignup(false);
-    onGetStarted();
+    try {
+      // API를 통한 회원가입
+      const response = await authAPI.signup({
+        username: signupForm.id,
+        password: signupForm.password,
+        name: signupForm.name,
+        birthDate: signupForm.birthDate,
+        gender: signupForm.gender === "male" ? "남자" : "여자",
+      });
+      
+      console.log("회원가입 성공:", response);
+      
+      // 토큰 저장
+      setToken(response.token);
+      
+      // 사용자 정보 localStorage에 저장
+      localStorage.setItem("user_profile", JSON.stringify(response.user));
+      
+      toast.success("회원가입이 완료되었습니다!", {
+        description: `${signupForm.name}님, 환영합니다!`
+      });
+      
+      setShowSignup(false);
+      onGetStarted();
+    } catch (error) {
+      console.error("Signup error:", error);
+      toast.error(error instanceof Error ? error.message : "회원가입 중 오류가 발생했습니다.");
+    }
   };
 
   return (
@@ -234,9 +250,8 @@ export function OnboardingScreen({ onGetStarted }: { onGetStarted: () => void })
               <Select
                 value={signupForm.gender}
                 onValueChange={(value: "male" | "female") => setSignupForm({ ...signupForm, gender: value })}
-                required
               >
-                <SelectTrigger className="h-12 rounded-xl">
+                <SelectTrigger className="h-12 rounded-xl" id="signup-gender">
                   <SelectValue placeholder="성별을 선택하세요" />
                 </SelectTrigger>
                 <SelectContent>
