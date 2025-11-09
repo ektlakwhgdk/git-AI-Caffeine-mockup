@@ -1,3 +1,4 @@
+# 변형 테스트
 # AI Caffeine Advisor Mockup - 프로젝트 문서
 
 ## 프로젝트 개요
